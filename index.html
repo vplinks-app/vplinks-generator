@@ -178,12 +178,12 @@ async function startGen(){
     for(let i=0;i<4;i++){
       document.getElementById('lm').textContent=`Generando foto ${i+1} de 4...`;
       setDot(i,'active');
-      const ir=await fetch(PROXY+encodeURIComponent(OAI+'images/generations'),{
+      const imgCtrl=new AbortController();const imgTimer=setTimeout(()=>imgCtrl.abort(),120000);const ir=await fetch('https://api.openai.com/v1/images/generations',{signal:imgCtrl.signal,
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+oaKey,'x-requested-with':'XMLHttpRequest'},
         body:JSON.stringify({model:'gpt-image-1',prompt:prompts[i]||prompts[0],n:1,size:'1024x1536'})
       });
-      const id=await ir.json();
+      clearTimeout(imgTimer);const id=await ir.json();
       if(id.error)throw new Error(id.error.message);
       const imgData = id.data?.[0]; genImgs.push(imgData?.url || (imgData?.b64_json ? 'data:image/png;base64,'+imgData.b64_json : ''));
       setDot(i,'done');
