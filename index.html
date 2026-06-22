@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>VP Links · Video Generator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#080808;color:#fff;font-family:Arial,sans-serif}
+.header{background:#0f0f0f;border-bottom:1px solid #1a1a1a;padding:16px 24px;display:flex;align-items:center;gap:12px}
+.logo{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#00ff88,#00ccff);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.main{display:flex;max-width:1000px;margin:0 auto;padding:24px 16px;gap:28px}
+.left{flex:1}.right{width:300px;flex-shrink:0}
+.card{background:#0f0f0f;border:1px solid #1e1e1e;border-radius:14px;padding:20px;margin-bottom:16px}
+.lbl{font-size:11px;color:#444;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+input[type=password]{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:10px 14px;color:#fff;font-size:14px;margin-bottom:8px}
+input:focus{outline:none;border-color:#00ff88}
+.btn{width:100%;padding:13px;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;margin-bottom:8px}
+.g{background:linear-gradient(135deg,#00ff88,#00ccff);color:#000}
+.g:disabled{background:#1a1a1a;color:#333;cursor:not-allowed}
+.r{background:linear-gradient(135deg,#ff416c,#ff4b2b);color:#fff}
+.dl{background:linear-gradient(135deg,#00ff88,#00ccff);color:#000}
+.upload-zone{border:2px dashed #2a2a2a;border-radius:14px;padding:36px 20px;text-align:center;cursor:pointer;background:#0a0a0a;margin-bottom:14px}
+.upload-zone:hover{border-color:#555}
+.pimg{max-height:160px;max-width:100%;border-radius:10px}
+.err{color:#ff6b6b;background:#1a0a0a;border:1px solid #3a1a1a;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;display:none}
+.loading{text-align:center;padding:50px 20px;display:none}
+.dots{display:flex;justify-content:center;gap:8px;margin:20px 0}
+.dot{width:54px;height:54px;border-radius:10px;border:2px solid #2a2a2a;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .3s}
+.dot.active{border-color:#00ff88;background:#1a3a20}
+.dot.done{border-color:#00ff88;background:#0a1a0f;color:#00ff88}
+.slides-sec{display:none}
+.si{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:10px;padding:10px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .15s}
+.si.active,.si:hover{border-color:#00ff88;background:#111}
+.sthumb{width:44px;height:44px;object-fit:cover;border-radius:8px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tag{background:#111;border:1px solid #222;border-radius:20px;padding:3px 10px;font-size:12px;color:#00ff88}
+.phone{background:#111;border-radius:34px;border:3px solid #1e1e1e;padding:12px 8px;box-shadow:0 20px 50px rgba(0,0,0,.6);position:sticky;top:24px}
+canvas{border-radius:20px;display:block;width:100%;background:#0a0a0a}
+.ctrl{margin-top:12px;flex-direction:column;gap:8px;display:none}
+.cr{display:flex;gap:8px}
+.bs{flex:1;padding:10px;background:#111;border:1px solid #222;border-radius:10px;color:#fff;cursor:pointer;font-weight:600;font-size:14px}
+.bs2{padding:10px 14px;background:#111;border:1px solid #222;border-radius:10px;color:#555;cursor:pointer}
+.rdot{width:8px;height:8px;border-radius:50%;background:#f44;display:inline-block;margin-right:6px;animation:blink 1s infinite}
+.ok-bar{background:#0a1a0f;border:1px solid #1a3a20;border-radius:10px;padding:10px 14px;margin-bottom:14px;display:none;align-items:center;gap:8px;font-size:13px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">▶</div>
+  <div><div style="font-weight:700;font-size:16px">VP Links · Video Generator</div><div style="font-size:11px;color:#555">GPT-4o + DALL·E 3</div></div>
+  <div style="margin-left:auto;display:none" id="btnNW"><button onclick="resetAll()" style="background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#888;padding:6px 14px;cursor:pointer;font-size:13px">↺ Nuevo vídeo</button></div>
+</div>
+<div class="main">
+  <div class="left">
+    <div class="card" id="keyCard">
+      <div class="lbl">🔑 OpenAI API Key</div>
+      <input type="password" id="ki" placeholder="sk-proj-..." oninput="ck()"/>
+      <button class="btn g" id="bk" onclick="saveKey()" disabled>Guardar</button>
+      <div style="font-size:11px;color:#333;margin-top:4px">Guardada solo en tu navegador</div>
+    </div>
+    <div class="ok-bar" id="okBar"><span style="color:#00ff88">✓</span> OpenAI conectada <button onclick="chKey()" style="margin-left:auto;background:none;border:none;color:#444;cursor:pointer;font-size:12px">cambiar</button></div>
+
+    <div id="upSec">
+      <div class="upload-zone" onclick="document.getElementById('fi').click()" ondrop="df(event)" ondragover="event.preventDefault()">
+        <input type="file" id="fi" accept="image/*" style="display:none" onchange="hf(event)">
+        <div id="ph"><div style="font-size:44px;margin-bottom:10px">📦</div><div style="font-weight:600;margin-bottom:4px">Sube la foto del producto</div><div style="font-size:13px;color:#444">Arrastra o haz clic</div></div>
+        <div id="ip" style="display:none"><img id="pi" class="pimg"/><div style="margin-top:8px;font-size:13px;color:#00ff88" id="pn"></div><div style="font-size:12px;color:#555;margin-top:4px">Haz clic para cambiar</div></div>
+      </div>
+      <div class="err" id="em"></div>
+      <button class="btn g" id="bg" onclick="startGen()" disabled>🎬 Generar vídeo con IA</button>
+    </div>
+
+    <div class="loading" id="ls">
+      <div style="font-size:48px;margin-bottom:14px" id="li">🔍</div>
+      <div style="font-weight:600;font-size:18px;margin-bottom:6px" id="lm">Analizando producto...</div>
+      <div class="dots" id="gd" style="display:none"><div class="dot" id="d0"></div><div class="dot" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div></div>
+      <div style="color:#444;font-size:13px" id="ln"></div>
+    </div>
+
+    <div class="slides-sec" id="ss">
+      <div class="lbl">Slides generados</div>
+      <div id="sl"></div>
+      <div class="tags" id="tl"></div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="phone">
+      <div style="text-align:center;margin-bottom:8px"><div style="width:70px;height:6px;background:#1e1e1e;border-radius:3px;display:inline-block"></div></div>
+      <canvas id="cv" width="284" height="506"></canvas>
+      <div style="text-align:center;margin-top:8px"><div style="width:54px;height:4px;background:#1e1e1e;border-radius:2px;display:inline-block"></div></div>
+    </div>
+    <div class="ctrl" id="ctrl">
+      <div class="cr"><button class="bs" id="bp" onclick="togglePlay()">▶ Preview</button><button class="bs2" onclick="resetPB()">↺</button></div>
+      <button class="btn r" id="be" onclick="startRec()">⏺ Exportar vídeo</button>
+      <button class="btn dl" id="bd" onclick="dlV()" style="display:none">⬇ Descargar .webm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Use corsproxy.io to bypass CORS for OpenAI
+const PROXY = 'https://corsproxy.io/?';
+const OAI = 'https://api.openai.com/v1/';
+
+let oaKey='',imgB64='',imgType='',slides=[],genImgs=[],hashtags=[],cur=0;
+let playing=false,af=null,mr=null,chunks=[],vBlob=null,cache={};
+
+window.onload=()=>{
+  const k=localStorage.getItem('vp_oakey');
+  if(k){document.getElementById('ki').value=k;saveKey();}
+};
+
+function ck(){document.getElementById('bk').disabled=!document.getElementById('ki').value.startsWith('sk-');}
+function saveKey(){
+  oaKey=document.getElementById('ki').value;
+  localStorage.setItem('vp_oakey',oaKey);
+  document.getElementById('keyCard').style.display='none';
+  const ob=document.getElementById('okBar');ob.style.display='flex';
+  upBtn();
+}
+function chKey(){oaKey='';document.getElementById('keyCard').style.display='block';document.getElementById('okBar').style.display='none';upBtn();}
+function upBtn(){document.getElementById('bg').disabled=!(oaKey&&imgB64);}
+
+function hf(e){rf(e.target.files[0]);}
+function df(e){e.preventDefault();rf(e.dataTransfer.files[0]);}
+function rf(f){
+  if(!f||!f.type.startsWith('image/'))return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    const u=ev.target.result;
+    imgB64=u.split(',')[1];imgType=u.split(';')[0].split(':')[1];
+    document.getElementById('ph').style.display='none';document.getElementById('ip').style.display='block';
+    document.getElementById('pi').src=u;document.getElementById('pn').textContent='✓ '+f.name;
+    upBtn();
+  };r.readAsDataURL(f);
+}
+function showErr(m){const e=document.getElementById('em');e.textContent=m;e.style.display=m?'block':'none';}
+
+async function startGen(){
+  showErr('');
+  document.getElementById('upSec').style.display='none';
+  document.getElementById('ls').style.display='block';
+  document.getElementById('li').textContent='🔍';
+  document.getElementById('lm').textContent='Analizando el producto...';
+  document.getElementById('gd').style.display='none';
+
+  try{
+    // GPT-4o via CORS proxy
+    const ar=await fetch(PROXY+encodeURIComponent(OAI+'chat/completions'),{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+oaKey,'x-requested-with':'XMLHttpRequest'},
+      body:JSON.stringify({
+        model:'gpt-4o',max_tokens:1500,
+        messages:[
+          {role:'system',content:`Eres el creador TikTok @vplinks. Estilo: joven, lifestyle, verano mediterráneo España. Promocionas productos de Hac00. Devuelve SOLO JSON sin markdown ni texto extra:
+{"producto":"nombre","slides":[{"texto":"max 5 palabras impactantes","emoji":"🔥","subtexto":"detalle"},{"texto":"slide2","emoji":"✨","subtexto":""},{"texto":"slide3","emoji":"💚","subtexto":""},{"texto":"link en bio 👇","emoji":"🛒","subtexto":"vplinks.netlify.app"}],"hashtags":["#hacoo","#verano","#moda","#oferta","#style"],"prompts":["Young attractive Spanish man dark beard short hair holding/using PRODUCT_DESC natural outdoor Mediterranean sunny lifestyle TikTok realistic photo natural light","Same man different relaxed pose product visible terrace beach warm golden light","Same man standing product featured urban Mediterranean street candid style","Same man closeup different angle product sunset beach summer influencer photo"]}`},
+          {role:'user',content:[
+            {type:'image_url',image_url:{url:`data:${imgType};base64,${imgB64}`}},
+            {type:'text',text:'Analiza este producto y genera el JSON. En prompts sustituye PRODUCT_DESC por descripción específica en inglés.'}
+          ]}
+        ]
+      })
+    });
+    const ad=await ar.json();
+    if(ad.error)throw new Error(ad.error.message);
+    const raw=ad.choices?.[0]?.message?.content||'';
+    const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    slides=parsed.slides;hashtags=parsed.hashtags||[];
+    const prompts=parsed.prompts||[];
+
+    document.getElementById('li').textContent='🎨';
+    document.getElementById('gd').style.display='flex';
+    document.getElementById('ln').textContent='Cada foto tarda ~15 segundos';
+    genImgs=[];
+
+    for(let i=0;i<4;i++){
+      document.getElementById('lm').textContent=`Generando foto ${i+1} de 4...`;
+      setDot(i,'active');
+      const ir=await fetch(PROXY+encodeURIComponent(OAI+'images/generations'),{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+oaKey,'x-requested-with':'XMLHttpRequest'},
+        body:JSON.stringify({model:'dall-e-3',prompt:prompts[i]||prompts[0],n:1,size:'1024x1792',quality:'standard'})
+      });
+      const id=await ir.json();
+      if(id.error)throw new Error(id.error.message);
+      genImgs.push(id.data?.[0]?.url||'');
+      setDot(i,'done');
+    }
+    showResult();
+  }catch(e){
+    showErr(e.message||'Error. Revisa tu API key y saldo en OpenAI.');
+    document.getElementById('upSec').style.display='block';
+    document.getElementById('ls').style.display='none';
+  }
+}
+
+function setDot(i,s){const d=document.getElementById('d'+i);d.className='dot'+(s==='done'?' done':s==='active'?' active':'');d.textContent=s==='done'?'✓':s==='active'?'⏳':'';}
+
+function showResult(){
+  document.getElementById('ls').style.display='none';
+  document.getElementById('ss').style.display='block';
+  document.getElementById('ctrl').style.display='flex';
+  document.getElementById('btnNW').style.display='block';
+  const sl=document.getElementById('sl');sl.innerHTML='';
+  slides.forEach((s,i)=>{
+    const d=document.createElement('div');d.className='si'+(i===0?' active':'');d.id='si'+i;d.onclick=()=>selS(i);
+    d.innerHTML=`${genImgs[i]?`<img src="${genImgs[i]}" class="sthumb"/>`:''}
+    <div><div style="font-weight:600;font-size:14px">${s.emoji} ${s.texto}</div>${s.subtexto?`<div style="font-size:12px;color:#00ff88">${s.subtexto}</div>`:''}</div>`;
+    sl.appendChild(d);
+  });
+  document.getElementById('tl').innerHTML=hashtags.map(h=>`<span class="tag">${h}</span>`).join('');
+  cur=0;drawS(0,.5);
+}
+
+function selS(i){cur=i;playing=false;cancelAnimationFrame(af);document.getElementById('bp').textContent='▶ Preview';document.querySelectorAll('.si').forEach((e,j)=>e.className='si'+(j===i?' active':''));drawS(i,.5);}
+
+function loadI(src){return new Promise(res=>{if(cache[src])return res(cache[src]);const img=new Image();img.crossOrigin='anonymous';img.onload=()=>{cache[src]=img;res(img);};img.onerror=()=>res(null);img.src=src;});}
+
+async function drawF(idx,prog){
+  const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height,s=slides[idx];
+  ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);
+  if(genImgs[idx]){const img=await loadI(genImgs[idx]);if(img){const sc=1+prog*.06,r=Math.max(W/img.naturalWidth,H/img.naturalHeight),dw=img.naturalWidth*r*sc,dh=img.naturalHeight*r*sc;ctx.drawImage(img,(W-dw)/2,(H-dh)/2,dw,dh);}}
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(0,0,0,.15)');g.addColorStop(.5,'rgba(0,0,0,.05)');g.addColorStop(1,'rgba(0,0,0,.88)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#00ff88';ctx.fillRect(0,0,W*prog,5);
+  ctx.font='bold 20px Arial';ctx.fillStyle='rgba(255,255,255,.7)';ctx.textAlign='left';ctx.shadowColor='rgba(0,0,0,.8)';ctx.shadowBlur=8;ctx.fillText('@vplinks',18,40);
+  slides.forEach((_,i)=>{ctx.beginPath();ctx.arc(W/2+(i-slides.length/2+.5)*22,H-30,i===idx?5:3,0,Math.PI*2);ctx.fillStyle=i===idx?'#00ff88':'rgba(255,255,255,.3)';ctx.shadowBlur=0;ctx.fill();});
+  ctx.shadowBlur=0;ctx.font='70px serif';ctx.textAlign='center';ctx.fillText(s.emoji,W/2,H*.62);
+  ctx.font="bold 50px 'Arial Black',Arial";ctx.fillStyle='#fff';ctx.shadowColor='rgba(0,0,0,.9)';ctx.shadowBlur=14;
+  const words=s.texto.split(' ');let lines=[],line='';
+  for(const w of words){const t=line?line+' '+w:w;if(ctx.measureText(t).width>W-60){lines.push(line);line=w;}else line=t;}lines.push(line);
+  const lh=58,sy=H*.71;lines.forEach((l,i)=>ctx.fillText(l,W/2,sy+i*lh));
+  if(s.subtexto){ctx.font='bold 23px Arial';ctx.fillStyle='#00ff88';ctx.shadowBlur=0;ctx.fillText(s.subtexto,W/2,sy+lines.length*lh+14);}
+  ctx.shadowBlur=0;
+}
+function drawS(i,p){drawF(i,p);}
+function togglePlay(){if(playing){playing=false;cancelAnimationFrame(af);document.getElementById('bp').textContent='▶ Preview';}else{playing=true;document.getElementById('bp').textContent='⏸ Pausar';cur=0;hlS(0);runPB();}}
+function resetPB(){playing=false;cancelAnimationFrame(af);document.getElementById('bp').textContent='▶ Preview';cur=0;hlS(0);drawS(0,.5);}
+function hlS(i){document.querySelectorAll('.si').forEach((e,j)=>e.className='si'+(j===i?' active':''));}
+function runPB(){let si=cur,t0=performance.now(),dur=2500;async function tick(now){if(!playing)return;const el=now-t0,pr=Math.min(el/dur,1);await drawF(si,pr);if(el>=dur){if(si<slides.length-1){si++;cur=si;hlS(si);t0=performance.now();}else{playing=false;document.getElementById('bp').textContent='▶ Preview';if(mr?.state==='recording')mr.stop();return;}}af=requestAnimationFrame(tick);}af=requestAnimationFrame(tick);}
+function startRec(){const cv=document.getElementById('cv');chunks=[];const stream=cv.captureStream(30);mr=new MediaRecorder(stream,{mimeType:'video/webm;codecs=vp9'});mr.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};mr.onstop=()=>{vBlob=new Blob(chunks,{type:'video/webm'});document.getElementById('be').style.display='none';document.getElementById('bd').style.display='block';};mr.start();const b=document.getElementById('be');b.disabled=true;b.innerHTML='<span class="rdot"></span>Grabando...';cur=0;playing=true;document.getElementById('bp').textContent='⏸ Pausar';hlS(0);runPB();}
+function dlV(){const u=URL.createObjectURL(vBlob);const a=document.createElement('a');a.href=u;a.download='vplinks_video.webm';a.click();URL.revokeObjectURL(u);}
+function resetAll(){playing=false;cancelAnimationFrame(af);slides=[];genImgs=[];hashtags=[];cur=0;vBlob=null;cache={};imgB64='';imgType='';document.getElementById('ph').style.display='block';document.getElementById('ip').style.display='none';document.getElementById('fi').value='';document.getElementById('ctrl').style.display='none';document.getElementById('btnNW').style.display='none';document.getElementById('be').style.display='block';document.getElementById('be').disabled=false;document.getElementById('be').textContent='⏺ Exportar vídeo';document.getElementById('bd').style.display='none';document.getElementById('ss').style.display='none';document.getElementById('upSec').style.display='block';showErr('');const ctx=document.getElementById('cv').getContext('2d');ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,284,506);}
+</script>
+</body>
+</html>
