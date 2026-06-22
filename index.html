@@ -92,8 +92,12 @@ canvas{border-radius:20px;display:block;width:100%;background:#0a0a0a}
       <div style="text-align:center;margin-top:8px"><div style="width:54px;height:4px;background:#1e1e1e;border-radius:2px;display:inline-block"></div></div>
     </div>
     <div class="ctrl" id="ctrl">
-      <div class="cr"><button class="bs" id="bp" onclick="togglePlay()">▶ Preview</button><button class="bs2" onclick="resetPB()">↺</button></div>
-      <button class="btn r" id="be" onclick="startRec()">⏺ Exportar vídeo</button>
+      <div class="cr">
+        <button class="bs2" onclick="prevSlide()" id="btnPrev">◀</button>
+        <span style="flex:1;text-align:center;line-height:40px;font-size:13px;color:#555" id="slideCounter">1 / 4</span>
+        <button class="bs2" onclick="nextSlide()" id="btnNext">▶</button>
+      </div>
+      <button class="btn r" id="be" onclick="startRec()">⏺ Grabar vídeo</button>
       <button class="btn dl" id="bd" onclick="dlV()" style="display:none">⬇ Descargar .webm</button>
     </div>
   </div>
@@ -155,7 +159,7 @@ async function startGen(){
         model:'gpt-4o',max_tokens:1500,
         messages:[
           {role:'system',content:`Eres el creador TikTok @vplinks. Estilo: joven, lifestyle, verano mediterráneo España. Promocionas productos de Hac00. Devuelve SOLO JSON sin markdown ni texto extra:
-{"producto":"nombre","slides":[{"texto":"max 5 palabras impactantes","emoji":"🔥","subtexto":"detalle"},{"texto":"slide2","emoji":"✨","subtexto":""},{"texto":"slide3","emoji":"💚","subtexto":""},{"texto":"link en bio 👇","emoji":"🛒","subtexto":"vplinks.netlify.app"}],"hashtags":["#hacoo","#verano","#moda","#oferta","#style"],"prompts":["Young attractive Spanish man dark beard short hair holding/using PRODUCT_DESC natural outdoor Mediterranean sunny lifestyle TikTok realistic photo natural light","Same man different relaxed pose product visible terrace beach warm golden light","Same man standing product featured urban Mediterranean street candid style","Same man closeup different angle product sunset beach summer influencer photo"]}`},
+{"producto":"nombre","slides":[{"texto":"max 5 palabras impactantes","emoji":"🔥","subtexto":"detalle o precio"},{"texto":"slide2 max 5 palabras","emoji":"✨","subtexto":""},{"texto":"slide3 max 5 palabras","emoji":"💚","subtexto":""},{"texto":"link en bio 👇","emoji":"🛒","subtexto":"vplinks.netlify.app"}],"hashtags":["#hacoo","#verano","#moda","#oferta","#style"],"prompts":["Young attractive Spanish man dark beard short hair, holding PRODUCT_DESC toward camera showing it clearly, natural Mediterranean outdoor background, sunny lifestyle TikTok photo, realistic natural light","Professional unboxing photo of PRODUCT_DESC, product being taken out of white box on clean white surface, overhead shot, bright studio lighting, minimalist style","PRODUCT_DESC placed on a cozy bed with white linen sheets, lifestyle product photography, natural window light, aesthetic flat lay style","PRODUCT_DESC on a wooden table next to a coffee cup, lifestyle photography, warm home ambient light, aesthetic Instagram style"]}`},
           {role:'user',content:[
             {type:'image_url',image_url:{url:`data:${imgType};base64,${imgB64}`}},
             {type:'text',text:'Analiza este producto y genera el JSON. En prompts sustituye PRODUCT_DESC por descripción específica en inglés.'}
@@ -211,7 +215,7 @@ function showResult(){
     sl.appendChild(d);
   });
   document.getElementById('tl').innerHTML=hashtags.map(h=>`<span class="tag">${h}</span>`).join('');
-  cur=0;drawS(0,.5);
+  cur=0;drawS(0,.5);updCounter();
 }
 
 function selS(i){cur=i;playing=false;cancelAnimationFrame(af);document.getElementById('bp').textContent='▶ Preview';document.querySelectorAll('.si').forEach((e,j)=>e.className='si'+(j===i?' active':''));drawS(i,.5);}
@@ -227,16 +231,21 @@ async function drawF(idx,prog){
   ctx.font='bold 20px Arial';ctx.fillStyle='rgba(255,255,255,.7)';ctx.textAlign='left';ctx.shadowColor='rgba(0,0,0,.8)';ctx.shadowBlur=8;ctx.fillText('@vplinks',18,40);
   slides.forEach((_,i)=>{ctx.beginPath();ctx.arc(W/2+(i-slides.length/2+.5)*22,H-30,i===idx?5:3,0,Math.PI*2);ctx.fillStyle=i===idx?'#00ff88':'rgba(255,255,255,.3)';ctx.shadowBlur=0;ctx.fill();});
   ctx.shadowBlur=0;ctx.font='70px serif';ctx.textAlign='center';ctx.fillText(s.emoji,W/2,H*.62);
-  ctx.font="bold 50px 'Arial Black',Arial";ctx.fillStyle='#fff';ctx.shadowColor='rgba(0,0,0,.9)';ctx.shadowBlur=14;
+  const mainSize=idx===0?25:50;
+  ctx.font=`bold ${mainSize}px 'Arial Black',Arial`;ctx.fillStyle='#fff';ctx.shadowColor='rgba(0,0,0,.9)';ctx.shadowBlur=14;
+  const maxW=idx===0?W-80:W-60;
   const words=s.texto.split(' ');let lines=[],line='';
-  for(const w of words){const t=line?line+' '+w:w;if(ctx.measureText(t).width>W-60){lines.push(line);line=w;}else line=t;}lines.push(line);
-  const lh=58,sy=H*.71;lines.forEach((l,i)=>ctx.fillText(l,W/2,sy+i*lh));
-  if(s.subtexto){ctx.font='bold 23px Arial';ctx.fillStyle='#00ff88';ctx.shadowBlur=0;ctx.fillText(s.subtexto,W/2,sy+lines.length*lh+14);}
+  for(const w of words){const t=line?line+' '+w:w;if(ctx.measureText(t).width>maxW){lines.push(line);line=w;}else line=t;}lines.push(line);
+  const lh=idx===0?30:58,sy=H*.71;lines.forEach((l,i)=>ctx.fillText(l,W/2,sy+i*lh));
+  const subSize=idx===0?11:23;
+  if(s.subtexto){ctx.font=`bold ${subSize}px Arial`;ctx.fillStyle='#00ff88';ctx.shadowBlur=0;ctx.fillText(s.subtexto,W/2,sy+lines.length*lh+14);}
   ctx.shadowBlur=0;
 }
 function drawS(i,p){drawF(i,p);}
-function togglePlay(){if(playing){playing=false;cancelAnimationFrame(af);document.getElementById('bp').textContent='▶ Preview';}else{playing=true;document.getElementById('bp').textContent='⏸ Pausar';cur=0;hlS(0);runPB();}}
-function resetPB(){playing=false;cancelAnimationFrame(af);document.getElementById('bp').textContent='▶ Preview';cur=0;hlS(0);drawS(0,.5);}
+function prevSlide(){if(cur>0){cur--;hlS(cur);drawS(cur,.5);updCounter();}}
+function nextSlide(){if(cur<slides.length-1){cur++;hlS(cur);drawS(cur,.5);updCounter();}}
+function updCounter(){const el=document.getElementById('slideCounter');if(el)el.textContent=(cur+1)+' / '+slides.length;}
+function resetPB(){cur=0;hlS(0);drawS(0,.5);updCounter();}
 function hlS(i){document.querySelectorAll('.si').forEach((e,j)=>e.className='si'+(j===i?' active':''));}
 function runPB(){let si=cur,t0=performance.now(),dur=2500;async function tick(now){if(!playing)return;const el=now-t0,pr=Math.min(el/dur,1);await drawF(si,pr);if(el>=dur){if(si<slides.length-1){si++;cur=si;hlS(si);t0=performance.now();}else{playing=false;document.getElementById('bp').textContent='▶ Preview';if(mr?.state==='recording')mr.stop();return;}}af=requestAnimationFrame(tick);}af=requestAnimationFrame(tick);}
 function startRec(){const cv=document.getElementById('cv');chunks=[];const stream=cv.captureStream(30);mr=new MediaRecorder(stream,{mimeType:'video/webm;codecs=vp9'});mr.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};mr.onstop=()=>{vBlob=new Blob(chunks,{type:'video/webm'});document.getElementById('be').style.display='none';document.getElementById('bd').style.display='block';};mr.start();const b=document.getElementById('be');b.disabled=true;b.innerHTML='<span class="rdot"></span>Grabando...';cur=0;playing=true;document.getElementById('bp').textContent='⏸ Pausar';hlS(0);runPB();}
