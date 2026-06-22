@@ -181,11 +181,11 @@ async function startGen(){
       const ir=await fetch(PROXY+encodeURIComponent(OAI+'images/generations'),{
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+oaKey,'x-requested-with':'XMLHttpRequest'},
-        body:JSON.stringify({model:'dall-e-2',prompt:prompts[i]||prompts[0],n:1,size:'1024x1024'})
+        body:JSON.stringify({model:'gpt-image-1',prompt:prompts[i]||prompts[0],n:1,size:'1024x1536'})
       });
       const id=await ir.json();
       if(id.error)throw new Error(id.error.message);
-      genImgs.push(id.data?.[0]?.url||'');
+      const imgData = id.data?.[0]; genImgs.push(imgData?.url || (imgData?.b64_json ? 'data:image/png;base64,'+imgData.b64_json : ''));
       setDot(i,'done');
     }
     showResult();
