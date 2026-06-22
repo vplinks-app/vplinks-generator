@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instalar Certificado</title>
+<style>
+body { font-family: Arial; text-align: center; padding: 40px 20px; background: #f0f0f0; }
+.btn { background: #4CAF50; color: white; padding: 20px 40px; font-size: 20px; border: none; border-radius: 10px; cursor: pointer; display: block; margin: 20px auto; width: 80%; }
+.steps { text-align: left; background: white; padding: 20px; border-radius: 10px; margin: 20px 0; }
+.steps li { margin: 10px 0; font-size: 16px; }
+</style>
+</head>
+<body>
+<h1>🔐 Certificado mitmproxy</h1>
+<p>Pulsa el botón para descargar e instalar el certificado</p>
+
+<button class="btn" onclick="downloadCert()">⬇️ Descargar Certificado</button>
+
+<div class="steps">
+<b>Después de descargar:</b>
+<ol>
+<li>Abre el archivo descargado</li>
+<li>Android te pedirá instalarlo</li>
+<li>Ponle nombre: <b>mitmproxy</b></li>
+<li>Úsalo para: <b>VPN y aplicaciones</b></li>
+<li>Acepta</li>
+</ol>
+</div>
+
+<script>
+function downloadCert() {
+    const b64 = "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUROVENDQWgyZ0F3SUJBZ0lVV0ZTV1F3a21oNFlXRmtxQTN6RG95akxyaElJd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0tERVNNQkFHQTFVRUF3d0piV2wwYlhCeWIzaDVNUkl3RUFZRFZRUUtEQWx0YVhSdGNISnZlSGt3SGhjTgpNall3TmpJd01qTXlNVE00V2hjTk16WXdOakUzTWpNeU1UTTRXakFvTVJJd0VBWURWUVFEREFsdGFYUnRjSEp2CmVIa3hFakFRQmdOVkJBb01DVzFwZEcxd2NtOTRlVENDQVNJd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUEFEQ0MKQVFvQ2dnRUJBTXdPMjBRNkNTK2pkRi9LUmZPUmVJd21Cc0VUa1QxeDJrcTdHaGRudEp1QmlZbzNzdGo2RVp5bApLbDFqM0VhRXRJNGg4TGgrKzRDRkd0cG81ZFp0SDh0VVBrTzJ6K3k0NmZTRENyWlZNZkF2azg1UFVCbXNMRmIyCm14MHAyOGNQbDJUa2xWbWhiMkM4Y0lpRXVnWHBsTXRmbjNySkZha1VyZVZrZWJJcmNVcng3aTU0RkN6UTdOTDcKbkg5QU9tb3hJZ0VkUDVOUXBtVmFlVDBKL0JWQ0hzY2dIWnRnODltNDIyaEZuK1hyV3doVER3ZTJvbGJFSDlZYQpTMWFQTHBvWnBzRTZXVGhKTjQxQXhhZ1YzamtMa1FXNkRUaGtsNWRtcXlkdnJ1OXVZdXNYNCtDV3BOSHBSWUV5Cm9xcXF1bE1ZUnowUGwzTnlJZndsWVhpNW5COG51WjBDQXdFQUFhTlhNRlV3RHdZRFZSMFRBUUgvQkFVd0F3RUIKL3pBVEJnTlZIU1VFRERBS0JnZ3JCZ0VGQlFjREFUQU9CZ05WSFE4QkFmOEVCQU1DQVFZd0hRWURWUjBPQkJZRQpGQ3hqUnlwUm51MGFSWlM4SG10b1hWQVNqZEpYTUEwR0NTcUdTSWIzRFFFQkN3VUFBNElCQVFCWmNTa1pKYnRnCkdsVkdhL3dNSXN1WVJLWGZOK3p4bHhDR21BTHNEc21DcGFVL0VucG9RR2F1dnBPditCYXpCL0JuYkNyelp3TE4KTU1Obm9CSldCUzRPbEhibWtvYkJ2dW1YcUJhbHBXQ1ptOWIvNzQxaE1FZlMzSU9RcDg1aE1OUjVxOW94ZWJYSwpFOHVSTnU3Q1FXRzZwbFhIdjhLN1lxNUpzQjBKeC8xU1lXUXV3Tks0a2xOb09HVzdmSU5iaWdiMmwxUVRzQmk2CjV0SzJpN2xVVndTWld0NXpXTW9qcmlzTC85bGdYSzF4d2tUOFNyN1J6Qm10SytNbUhzMUY3eDJNTytFRkdTeFoKR2hBWnVYcXlFdnNLeUV1Rk9Dd3BxRGl0SW1kaWxaYlhoZDJMaFAwdGVpYjNnS25pQ0UvdWNsRHBqRkhlajBvLwpTNjVwR29tWEM0Wk4KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=";
+    const bin = atob(b64);
+    const arr = new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+    const blob = new Blob([arr], {type: 'application/x-x509-ca-cert'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'mitmproxy-ca-cert.cer';
+    a.click();
+}
+</script>
+</body>
+</html>
