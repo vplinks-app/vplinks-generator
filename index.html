@@ -101,7 +101,7 @@ canvas{border-radius:20px;display:block;width:100%;background:#0a0a0a}
 
 <script>
 // Use corsproxy.io to bypass CORS for OpenAI
-const PROXY = 'https://corsproxy.io/?';
+
 const OAI = 'https://api.openai.com/v1/';
 
 let oaKey='',imgB64='',imgType='',slides=[],genImgs=[],hashtags=[],cur=0;
@@ -148,7 +148,7 @@ async function startGen(){
 
   try{
     // GPT-4o via CORS proxy
-    const ar=await fetch(PROXY+encodeURIComponent(OAI+'chat/completions'),{
+    const ar=await fetch('https://api.openai.com/v1/chat/completions',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+oaKey,'x-requested-with':'XMLHttpRequest'},
       body:JSON.stringify({
